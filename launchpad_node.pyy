@@ -139,9 +139,9 @@ class Launchpad_Class(object):
 
 
     def _handle_cmd_vel(self, msg):
-    	cmd_message = "VES," + str(int(msg.linear.x*1000))+'\n'
+    	cmd_message = "VES," + str(msg.linear.x*1000)+'\n'
     	self._WriteSerial(cmd_message)
-	cmd_message = "WHS," + str(int(msg.angular.z*10))+'\n'
+	cmd_message = "WHS," + str(msg.angular.z*10)+'\n'
 	self._WriteSerial(cmd_message)
 
 
@@ -175,7 +175,6 @@ class Launchpad_Class(object):
 # Calculate orientation from accelerometer and gyrometer
 
     def _HandleReceivedLine(self, line):
-	rospy.loginfo(line)
         self._Counter = self._Counter + 1
         #self._SerialPublisher.publish(
          #   String(str(self._Counter) + ", in:  " + line))
