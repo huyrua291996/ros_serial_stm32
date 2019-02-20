@@ -36,6 +36,9 @@ class Launchpad_Class(object):
         # Sensor variables
         self._Counter = 0
 
+        self._dxy = 0
+        self._dth = 0
+
         self._left_encoder_value = 0
         self._right_encoder_value = 0
 
@@ -70,6 +73,8 @@ class Launchpad_Class(object):
 
 #######################################################################################################################
 #Subscribers and Publishers
+        self._dxy = rospy.Publisher('dxy', Float32, queue_size=10)
+        self._dth = rospy.Publisher('dth', Float32, queue_size=10)
 
         # Publisher for left and right wheel encoder values
         self._Left_Encoder = rospy.Publisher('lwheel', Int64, queue_size=10)
@@ -175,76 +180,26 @@ class Launchpad_Class(object):
 # Calculate orientation from accelerometer and gyrometer
 
     def _HandleReceivedLine(self, line):
-	rospy.loginfo(line)
-        self._Counter = self._Counter + 1
+	#rospy.loginfo(line)
+        #self._Counter = self._Counter + 1
         #self._SerialPublisher.publish(
          #   String(str(self._Counter) + ", in:  " + line))
 
         if(len(line) > 0):
 
-            lineParts = line.split('\t')
+            lineParts = line.split(',')
             try:
-                if(lineParts[0] == 'e'):
-                    self._left_encoder_value = long(lineParts[1])
-                    self._right_encoder_value = long(lineParts[2])
+                if(lineParts[0] == 'DXY'):
+                    self._dxy = float(lineParts[1])
+                    rospy.loginfo("DXY:" + str(self._dxy))
 
 
-#######################################################################################################################
 
-                    #self._Left_Encoder.publish(self._left_encoder_value)
-                    #self._Right_Encoder.publish(self._right_encoder_value)
+                if(lineParts[0] == 'DTH'):
+                    self._dth = float(lineParts[1])
+                    rospy.loginfo("DTH" + str(self._dth))
 
-#######################################################################################################################
-
-                if(lineParts[0] == 'b'):
-                    self._battery_value = float(lineParts[1])
-
-#######################################################################################################################
-                    #self._Battery_Level.publish(self._battery_value)
-
-#######################################################################################################################
-
-                if(lineParts[0] == 'u'):
-                    self._ultrasonic_value = float(lineParts[1])
-
-
-#######################################################################################################################
-                    #self._Ultrasonic_Value.publish(self._ultrasonic_value)
-#######################################################################################################################
-
-                if(lineParts[0] == 'i'):
-
-                    self._qx = float(lineParts[1])
-                    self._qy = float(lineParts[2])
-                    self._qz = float(lineParts[3])
-                    self._qw = float(lineParts[4])
-
-
-#######################################################################################################################
-                    #self._qx_.publish(self._qx)
-                    #self._qy_.publish(self._qy)
-                    #self._qz_.publish(self._qz)
-                    #self._qw_.publish(self._qw)
-
-#######################################################################################################################
-
-                    imu_msg = Imu()
-                    h = Header()
-                    h.stamp = rospy.Time.now()
-                    h.frame_id = self.frame_id
-
-                    imu_msg.header = h
-
-                    imu_msg.orientation_covariance = (-1., ) * 9
-                    imu_msg.angular_velocity_covariance = (-1., ) * 9
-                    imu_msg.linear_acceleration_covariance = (-1., ) * 9
-
-                    imu_msg.orientation.x = self._qx
-                    imu_msg.orientation.y = self._qy
-                    imu_msg.orientation.z = self._qz
-                    imu_msg.orientation.w = self._qw
-
-                    #self.imu_pub.publish(imu_msg)
+              
 
             except:
                 rospy.logwarn("Error in Sensor values")
