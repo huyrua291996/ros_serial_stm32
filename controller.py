@@ -7,7 +7,7 @@ from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from tf.broadcaster import TransformBroadcaster
-from tf.transformations
+import tf.transformations
 from std_msgs.msg import Int16, Int64, Float32
 
 
@@ -45,8 +45,8 @@ class DiffTf:
         self.then = rospy.Time.now()
         
         # subscriptions
-        rospy.Subscriber("dxy", Float32, self.dxyCallback)
-        rospy.Subscriber("dth", Float32, self.dthCallback)
+        rospy.Subscriber("/dxy", Float32, self.dxyCallback)
+        rospy.Subscriber("/dth", Float32, self.dthCallback)
         self.odomPub = rospy.Publisher("odom", Odometry,queue_size=10)
         self.odomBroadcaster = TransformBroadcaster()
         
@@ -62,29 +62,33 @@ class DiffTf:
     #############################################################################
     def update(self):
     #############################################################################
-        now = rospy.Time.now()
-        if now > self.t_next:
-            elapsed = now - self.then
-            self.then = now
-            elapsed = elapsed.to_sec()            
+        now = rospy.Time.now() 
+        
+        
+        
+                    
 
              
             #if (self.d != 0):
                 # calculate distance traveled in x and y
-            x = cos( self.dth ) * self.d
-            y = -sin( self.dth ) * self.d
+        x = cos( self.dth ) * self.d
+        y = -sin( self.dth ) * self.d
                 # calculate the final position of the robot
-            self.x = self.x + ( cos( self.th ) * x - sin( self.th ) * y )
-            self.y = self.y + ( sin( self.th ) * x + cos( self.th ) * y )
+        self.x = self.x + ( cos( self.th ) * x - sin( self.th ) * y )
+        self.y = self.y + ( sin( self.th ) * x + cos( self.th ) * y )
             #if( self.dth != 0):
-            self.th = self.th + self.dth
-            self.dx = self.d / 0.1
-            self.dr = self.dth / 0.1
+        self.th = self.th + self.dth
+        self.dx = self.d / 0.1
+        self.dr = self.dth / 0.1
                 
             # publish the odom information
-            q = tf.transformations.quaternion_from_euler(0,0,self.th)
-            quaternion = Quaternion(*q)            
-            self.odomBroadcaster.sendTransform(
+        q = tf.transformations.quaternion_from_euler(0,0,self.th)
+        quaternion = Quaternion(*q)
+	#quaternion.x = 0.0
+	#quaternion.y = 0.0
+	#quaternion.z = sin(self.th / 2)
+	#quaternion.w = cos(self.th / 2)            
+        self.odomBroadcaster.sendTransform(
                 (self.x, self.y, 0),
                 (quaternion.x, quaternion.y, quaternion.z, quaternion.w),
                 rospy.Time.now(),
@@ -92,18 +96,18 @@ class DiffTf:
                 self.odom_frame_id
                 )
             
-            odom = Odometry()
-            odom.header.stamp = now
-            odom.header.frame_id = self.odom_frame_id
-            odom.pose.pose.position.x = self.x
-            odom.pose.pose.position.y = self.y
-            odom.pose.pose.position.z = 0
-            odom.pose.pose.orientation = quaternion
-            odom.child_frame_id = self.base_frame_id
-            odom.twist.twist.linear.x = self.dx
-            odom.twist.twist.linear.y = 0
-            odom.twist.twist.angular.z = self.dr
-            self.odomPub.publish(odom)
+        odom = Odometry()
+        odom.header.stamp = now
+        odom.header.frame_id = self.odom_frame_id
+        odom.pose.pose.position.x = self.x
+        odom.pose.pose.position.y = self.y
+        odom.pose.pose.position.z = 0
+        odom.pose.pose.orientation = quaternion
+        odom.child_frame_id = self.base_frame_id
+        odom.twist.twist.linear.x = self.dx
+        odom.twist.twist.linear.y = 0
+        odom.twist.twist.angular.z = self.dr
+        self.odomPub.publish(odom)
             
             
 

@@ -142,12 +142,12 @@ class Launchpad_Class(object):
         #self._right_motor_speed = rospy.Subscriber(
         #    'right_wheel_speed', Float32, self._Update_Right_Speed)
 
-        #rospy.Subscriber('cmd_vel', Twist, self._handle_cmd_vel)
-	self.sub = rospy.Subscriber('/move_base/DWAPlannerROS/global_plan', Path, self.clbk_path)
-	rospy.Subscriber('/odom', Odometry, self.clbk_odom)
-	rospy.Timer(rospy.Duration(0.1), self.timerCB)
-	rospy.Subscriber('/pure', String, self.clbk_pure)
-	self.odom = Odometry()
+        rospy.Subscriber('cmd_vel', Twist, self._handle_cmd_vel)
+	#self.sub = rospy.Subscriber('/move_base/DWAPlannerROS/global_plan', Path, self.clbk_path)
+	#rospy.Subscriber('/odom', Odometry, self.clbk_odom)
+	#rospy.Timer(rospy.Duration(0.1), self.timerCB)
+	#rospy.Subscriber('/pure', String, self.clbk_pure)
+	#self.odom = Odometry()
 
     def clbk_pure(self, msg):
 	self._WriteSerial(msg.data)	
